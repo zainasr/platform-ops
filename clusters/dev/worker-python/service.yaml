@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: worker-python
+spec:
+  selector:
+    app: worker-python
+  ports:
+    - name: metrics
+      port: 9000
+      targetPort: 9000
+  type: ClusterIP
