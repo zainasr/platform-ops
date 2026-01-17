@@ -1,8 +1,8 @@
 replicaCount: 1
 
 image:
-  repository: core-go
-  tag: local
+  repository: ghcr.io/zainasr/core-go
+  tag: 76dab03
   pullPolicy: IfNotPresent
 
 service:

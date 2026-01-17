@@ -1,8 +1,8 @@
 replicaCount: 1
 
 image:
-  repository: api-node
-  tag: local
+  repository: ghcr.io/zainasr/api-node
+  tag: 76dab03
   pullPolicy: IfNotPresent
 
 service:
