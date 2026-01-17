@@ -1,0 +1,34 @@
+replicaCount: 1
+
+image:
+  repository: api-node
+  tag: local
+  pullPolicy: IfNotPresent
+
+service:
+  port: 3000
+
+env:
+  ENV: dev
+  PORT: "3000"
+  CORE_GO_BASE_URL: "http://core-go:8080"
+
+ingress:
+  enabled: true
+  className: nginx
+  host: api.local.dev
+  tls:
+    enabled: true
+    secretName: api-local-dev-tls
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 64Mi
+  limits:
+    cpu: 500m
+    memory: 128Mi
+
+securityContext:
+  runAsUser: 65532
+  runAsGroup: 65532
