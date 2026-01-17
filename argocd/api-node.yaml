@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: api-node
+  namespace: argocd
+spec:
+  project: default
+
+  source:
+    repoURL: https://github.com/zainasr/platform-ops.git
+    targetRevision: main
+    path: helm/api-node
+    helm:
+      releaseName: api-node
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

@@ -1,0 +1,25 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: core-go
+  namespace: argocd
+spec:
+  project: default
+
+  source:
+    repoURL: https://github.com/zainasr/platform-ops.git
+    targetRevision: main
+    path: helm/core-go
+    helm:
+      releaseName: core-go
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
