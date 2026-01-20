@@ -3,7 +3,7 @@ replicaCount: 1
 image:
   repository: ghcr.io/zainasr/api-node
   tag: 8276d63
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
   imagePullSecret: "ghcr-cred"
 
 service:
