@@ -2,7 +2,7 @@ replicaCount: 1
 
 image:
   repository: ghcr.io/zainasr/worker-python
-  tag: 76dab03
+  tag: 96d8aa9
   pullPolicy: IfNotPresent
 
 env:
