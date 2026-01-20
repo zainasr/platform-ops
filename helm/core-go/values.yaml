@@ -2,7 +2,7 @@ replicaCount: 1
 
 image:
   repository: ghcr.io/zainasr/core-go
-  tag: 8276d63
+  tag: 5d74641
   pullPolicy: Always
   imagePullSecret: "ghcr-cred"
 
