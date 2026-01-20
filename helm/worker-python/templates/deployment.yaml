@@ -18,6 +18,8 @@ spec:
         - name: worker-python
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          imagePullSecrets:
+            - name: {{ .Values.image.imagePullSecret }}
           env:
             - name: ENV
               value: {{ .Values.env.ENV | quote }}

@@ -4,6 +4,7 @@ image:
   repository: ghcr.io/zainasr/api-node
   tag: ad582b8
   pullPolicy: IfNotPresent
+  imagePullSecret: "ghcr-cred"
 
 service:
   port: 3000

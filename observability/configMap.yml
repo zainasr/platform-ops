@@ -1,0 +1,42 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-config
+  namespace: observability
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: 15s
+      scrape_timeout: 10s
+      evaluation_interval: 15s
+
+    scrape_configs:
+      - job_name: "kubernetes-apps"
+
+        # --- Kubernetes Service Discovery ---
+        kubernetes_sd_configs:
+          - role: endpoints
+
+        # --- Relabeling: decide WHAT to scrape ---
+        relabel_configs:
+          # 1. Keep only services we care about
+          - source_labels: [__meta_kubernetes_service_name]
+            action: keep
+            regex: api-node|core-go|worker-python
+
+          # 2. Ensure we scrape only the correct port (safety)
+          - source_labels: [__meta_kubernetes_endpoint_port_name]
+            action: keep
+            regex: http|metrics|web|.*
+
+          # 3. Set Prometheus "job" label = service name
+          - source_labels: [__meta_kubernetes_service_name]
+            target_label: job
+
+          # 4. Add namespace label
+          - source_labels: [__meta_kubernetes_namespace]
+            target_label: namespace
+
+          # 5. Add pod name label (useful for debugging)
+          - source_labels: [__meta_kubernetes_pod_name]
+            target_label: pod

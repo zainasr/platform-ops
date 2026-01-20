@@ -4,6 +4,7 @@ image:
   repository: ghcr.io/zainasr/worker-python
   tag: ad582b8
   pullPolicy: IfNotPresent
+  imagePullSecret: "ghcr-cred"
 
 env:
   ENV: dev
