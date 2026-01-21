@@ -40,3 +40,27 @@ data:
           # 5. Add pod name label (useful for debugging)
           - source_labels: [__meta_kubernetes_pod_name]
             target_label: pod
+      
+      - job_name: "node-exporter"
+        kubernetes_sd_configs:
+          - role: pod
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_namespace]
+            action: keep
+            regex: observability
+          - source_labels: [__meta_kubernetes_pod_label_app]
+            action: keep
+            regex: node-exporter
+          - source_labels: [__meta_kubernetes_pod_node_name]
+            target_label: node
+      - job_name: "kube-state-metrics"
+        kubernetes_sd_configs:
+          - role: pod
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_namespace]
+            action: keep
+            regex: observability
+          - source_labels: [__meta_kubernetes_pod_label_app]
+            action: keep
+            regex: kube-state-metrics
+          
