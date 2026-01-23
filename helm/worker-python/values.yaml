@@ -2,7 +2,7 @@ replicaCount: 1
 
 image:
   repository: ghcr.io/zainasr/worker-python
-  tag: 5d74641
+  tag: 1df3b1f
   pullPolicy: Always
   imagePullSecret: "ghcr-cred"
 
