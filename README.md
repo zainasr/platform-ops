@@ -1,73 +1,233 @@
-Platform Operations (GitOps Repository)
+# Platform Operations - GitOps Repository
 
-This repository defines the desired state of the platform and is managed using GitOps principles.
+[![GitOps](https://img.shields.io/badge/GitOps-ArgoCD-orange)](https://argo-cd.readthedocs.io/)
+[![Kubernetes](https://img.shields.io/badge/Kubernetes-1.28+-blue)](https://kubernetes.io/)
+[![Helm](https://img.shields.io/badge/Helm-v3-0f1689)](https://helm.sh/)
+[![Prometheus](https://img.shields.io/badge/Monitoring-Prometheus-e6522c)](https://prometheus.io/)
+[![Grafana](https://img.shields.io/badge/Dashboards-Grafana-f46800)](https://grafana.com/)
 
-It contains:
+> **Production-ready Kubernetes infrastructure managed through GitOps principles with comprehensive observability**
 
-Helm charts for application workloads
+This repository serves as the **single source of truth** for the entire platform infrastructure. It defines the desired state of all Kubernetes resources and is automatically reconciled by Argo CD. All changes to the cluster are driven exclusively through Git commits—no manual `kubectl apply` commands.
 
-Argo CD Applications
+---
 
-Kubernetes configuration
+## 📋 Table of Contents
 
-Environment-specific values
+- [Philosophy & Purpose](#-philosophy--purpose)
+- [Repository Structure](#-repository-structure)
+- [Technology Stack](#-technology-stack)
+- [Helm Charts](#️-helm-charts)
+- [GitOps with Argo CD](#-gitops-with-argo-cd)
+- [Observability Stack](#-observability-stack)
+- [Local Setup Guide](#-local-setup-guide)
+- [CI/CD Integration](#-cicd-integration)
+- [Security & Best Practices](#-security--best-practices)
+- [Troubleshooting](#-troubleshooting)
+- [Cleanup & Reset](#-cleanup--reset)
 
-Manual observability setup (Prometheus)
+---
 
-All changes to the cluster are driven only by Git and reconciled by Argo CD.
+## 🎯 Philosophy & Purpose
 
-🎯 Purpose
+### Core Question
 
-This repository answers a single question:
+**"What should be running in the cluster right now?"**
 
-“What should be running in the cluster right now?”
+This repository provides the definitive answer through declarative configuration.
 
-Git is the single source of truth.
-The cluster is treated as disposable.
+### GitOps Principles
 
-📂 Repository Structure
+✅ **Git as Single Source of Truth**  
+✅ **Declarative Infrastructure**  
+✅ **Automated Reconciliation**  
+✅ **Immutable Deployments**  
+✅ **Auditable Change History**  
+✅ **Self-Healing Capabilities**  
+
+### Design Principles
+
+- **Separation of Concerns**: Application code lives in [`platform`](https://github.com/zainasr/platform) repository
+- **Environment Parity**: Same patterns work across dev, staging, and production
+- **Disposable Infrastructure**: Clusters can be recreated from scratch in minutes
+- **Progressive Delivery**: Controlled rollouts with automated rollback capabilities
+- **Observability First**: Built-in monitoring, metrics, and visualization
+
+---
+
+## 📂 Repository Structure
+
+```
 platform-ops/
-├── helm/
+│
+├── helm/                          # Helm charts for all services
 │   ├── api-node/
+│   │   ├── Chart.yaml            # Chart metadata
+│   │   ├── values.yaml           # Default configuration
+│   │   └── templates/            # Kubernetes manifests
+│   │       ├── deployment.yaml
+│   │       ├── service.yaml
+│   │       ├── ingress.yaml
+│   │       ├── hpa.yaml          # Horizontal Pod Autoscaler
+│   │       ├── pdb.yaml          # Pod Disruption Budget
+│   │       └── servicemonitor.yaml
+│   │
 │   ├── core-go/
+│   │   ├── Chart.yaml
+│   │   ├── values.yaml
+│   │   └── templates/
+│   │       └── ...
+│   │
 │   └── worker-python/
+│       ├── Chart.yaml
+│       ├── values.yaml
+│       └── templates/
+│           └── ...
 │
-├── argocd/
-│   ├── api-node.yml
-│   ├── core-go.yml
-│   └── worker-python.yml
+├── argocd/                        # Argo CD Application definitions
+│   ├── api-node.yaml             # Application CRD for api-node
+│   ├── core-go.yaml              # Application CRD for core-go
+│   └── worker-python.yaml        # Application CRD for worker-python
 │
-├── observability/
-│   └── prometheus/
-│       ├── namespace.yaml
-│       ├── rbac.yaml
-│       ├── configmap.yaml
-│       ├── deployment.yaml
-│       └── service.yaml
+├── observability/                 # Monitoring and observability stack
+│   ├── prometheus/               # Prometheus metrics collection
+│   │   ├── namespace.yaml        # Dedicated namespace
+│   │   ├── rbac.yaml             # ServiceAccount + ClusterRole
+│   │   ├── configMap.yml         # Scrape configs & rules
+│   │   ├── deployment.yaml       # Prometheus deployment
+│   │   └── service.yaml          # Prometheus service
+│   │
+│   └── grafana/                  # Grafana dashboards
+│       ├── deployment.yaml       # Grafana deployment
+│       ├── service.yaml          # Grafana service
+│       ├── configmap-dashboards.yaml
+│       └── configmap-datasources.yaml
 │
-└── README.md
+├── ingress/                       # Ingress controller (NGINX)
+│   └── ingress-nginx.yaml
+│
+└── README.md                      # This file
+```
 
-⚙️ Helm Charts
+---
 
-Each service chart contains:
+## 🛠️ Technology Stack
 
-Chart.yaml – chart metadata
+| Component | Technology | Version | Purpose |
+|-----------|-----------|---------|---------|
+| **Orchestration** | Kubernetes | 1.28+ | Container orchestration |
+| **GitOps** | Argo CD | 2.9+ | Continuous deployment |
+| **Package Manager** | Helm | 3.13+ | Templating & versioning |
+| **Ingress** | NGINX Ingress | 1.9+ | External traffic routing |
+| **Metrics** | Prometheus | 2.48+ | Metrics collection |
+| **Visualization** | Grafana | 10.2+ | Dashboards & alerting |
+| **Container Registry** | GHCR | Latest | Image storage |
+| **Local Cluster** | Kind | 0.20+ | Local K8s cluster |
 
-values.yaml – environment configuration
+---
 
-templates/ – Kubernetes manifests
+## ⚙️ Helm Charts
 
-Helm is used for:
+### Chart Structure
 
-Reusability across environments
+Each service has a dedicated Helm chart following best practices:
 
-Controlled rollouts
+```yaml
+helm/service-name/
+├── Chart.yaml              # Chart metadata & versioning
+├── values.yaml            # Default values (overridable)
+├── values-dev.yaml        # Development overrides
+├── values-prod.yaml       # Production overrides
+└── templates/
+    ├── deployment.yaml    # Main workload
+    ├── service.yaml       # Service definition
+    ├── ingress.yaml       # External routing
+    ├── hpa.yaml          # Autoscaling config
+    ├── pdb.yaml          # Disruption budget
+    ├── configmap.yaml    # Configuration data
+    ├── secret.yaml       # Sensitive data (sealed)
+    └── servicemonitor.yaml # Prometheus scraping
+```
 
-Versioned upgrades
+### Chart Components
 
-Rollback support
+#### 1. **Deployment**
+- Container specifications
+- Resource limits and requests
+- Security context (non-root)
+- Health probes (liveness/readiness)
+- Environment variables
+- Volume mounts
 
-All charts are GitOps-safe and environment-agnostic.
+#### 2. **Service**
+- ClusterIP service type
+- Port definitions
+- Selector labels
+- Session affinity (if needed)
+
+#### 3. **Ingress**
+- Path-based routing
+- TLS termination
+- SSL certificates
+- Rate limiting annotations
+
+#### 4. **Horizontal Pod Autoscaler (HPA)**
+- CPU-based scaling
+- Memory-based scaling
+- Custom metrics (optional)
+
+#### 5. **Pod Disruption Budget (PDB)**
+- Minimum available pods
+- Maximum unavailable pods
+- High availability guarantees
+
+### Key Benefits
+
+✅ **Reusability**: Same chart across dev/staging/prod  
+✅ **Versioning**: Semantic versioning for charts  
+✅ **Templating**: DRY principle with Go templates  
+✅ **Rollback**: Built-in rollback capabilities  
+✅ **Testing**: `helm template` and `helm lint`  
+✅ **GitOps Compatible**: Declarative and deterministic  
+
+### Example Values (api-node)
+
+```yaml
+# values.yaml
+replicaCount: 3
+
+image:
+  repository: ghcr.io/org/api-node
+  tag: "a1b2c3d"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 3000
+
+ingress:
+  enabled: true
+  className: nginx
+  hosts:
+    - host: api.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+```
 
 🔁 GitOps with Argo CD
 
